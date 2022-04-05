@@ -51,8 +51,8 @@ use InvalidArgumentException;
  *      $loader->register();
  * ```
  */
-class Autoloader
-{
+class Autoloader {
+
     /**
      * Stores namespaces as key, and path as values.
      *
@@ -80,8 +80,7 @@ class Autoloader
      *
      * @return $this
      */
-    public function initialize(Autoload $config, Modules $modules)
-    {
+    public function initialize(Autoload $config, Modules $modules) {
         // We have to have one or the other, though we don't enforce the need
         // to have both present in order to work.
         if (empty($config->psr4) && empty($config->classmap)) {
@@ -111,14 +110,11 @@ class Autoloader
     /**
      * Register the loader with the SPL autoloader stack.
      */
-    public function register()
-    {
+    public function register() {
         // Prepend the PSR4  autoloader for maximum performance.
         spl_autoload_register([$this, 'loadClass'], true, true); // @phpstan-ignore-line
-
         // Now prepend another loader for the files in our class map.
         spl_autoload_register([$this, 'loadClassmap'], true, true); // @phpstan-ignore-line
-
         // Load our non-class files
         foreach ($this->files as $file) {
             if (is_string($file)) {
@@ -134,8 +130,7 @@ class Autoloader
      *
      * @return $this
      */
-    public function addNamespace($namespace, ?string $path = null)
-    {
+    public function addNamespace($namespace, ?string $path = null) {
         if (is_array($namespace)) {
             foreach ($namespace as $prefix => $namespacedPath) {
                 $prefix = trim($prefix, '\\');
@@ -164,8 +159,7 @@ class Autoloader
      *
      * @return array
      */
-    public function getNamespace(?string $prefix = null)
-    {
+    public function getNamespace(?string $prefix = null) {
         if ($prefix === null) {
             return $this->prefixes;
         }
@@ -178,8 +172,7 @@ class Autoloader
      *
      * @return $this
      */
-    public function removeNamespace(string $namespace)
-    {
+    public function removeNamespace(string $namespace) {
         if (isset($this->prefixes[trim($namespace, '\\')])) {
             unset($this->prefixes[trim($namespace, '\\')]);
         }
@@ -192,8 +185,7 @@ class Autoloader
      *
      * @return false|string
      */
-    public function loadClassmap(string $class)
-    {
+    public function loadClassmap(string $class) {
         $file = $this->classmap[$class] ?? '';
 
         if (is_string($file) && $file !== '') {
@@ -211,8 +203,7 @@ class Autoloader
      * @return false|string The mapped file on success, or boolean false
      *                      on failure.
      */
-    public function loadClass(string $class)
-    {
+    public function loadClass(string $class) {
         $class = trim($class, '\\');
         $class = str_ireplace('.php', '', $class);
 
@@ -226,8 +217,7 @@ class Autoloader
      *
      * @return false|string The mapped file name on success, or boolean false on fail
      */
-    protected function loadInNamespace(string $class)
-    {
+    protected function loadInNamespace(string $class) {
         if (strpos($class, '\\') === false) {
             return false;
         }
@@ -239,6 +229,9 @@ class Autoloader
                 if (strpos($class, $namespace) === 0) {
                     $filePath = $directory . str_replace('\\', DIRECTORY_SEPARATOR, substr($class, strlen($namespace))) . '.php';
                     $filename = $this->includeFile($filePath);
+                   // print '\n';
+                   // print_r($filename);
+                   // print '<br/>';
 
                     if ($filename) {
                         return $filename;
@@ -256,8 +249,7 @@ class Autoloader
      *
      * @return false|string The filename on success, false if the file is not loaded
      */
-    protected function includeFile(string $file)
-    {
+    protected function includeFile(string $file) {
         $file = $this->sanitizeFilename($file);
 
         if (is_file($file)) {
@@ -280,8 +272,7 @@ class Autoloader
      *
      * @return string The sanitized filename
      */
-    public function sanitizeFilename(string $filename): string
-    {
+    public function sanitizeFilename(string $filename): string {
         // Only allow characters deemed safe for POSIX portable filenames.
         // Plus the forward slash for directory separators since this might be a path.
         // http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_278
@@ -295,9 +286,8 @@ class Autoloader
     /**
      * Locates autoload information from Composer, if available.
      */
-    protected function discoverComposerNamespaces()
-    {
-        if (! is_file(COMPOSER_PATH)) {
+    protected function discoverComposerNamespaces() {
+        if (!is_file(COMPOSER_PATH)) {
             return;
         }
 
@@ -305,8 +295,8 @@ class Autoloader
          * @var ClassLoader $composer
          */
         $composer = include COMPOSER_PATH;
-        $paths    = $composer->getPrefixesPsr4();
-        $classes  = $composer->getClassMap();
+        $paths = $composer->getPrefixesPsr4();
+        $classes = $composer->getClassMap();
 
         unset($composer);
 
@@ -325,4 +315,5 @@ class Autoloader
         $this->prefixes = array_merge($this->prefixes, $newPaths);
         $this->classmap = array_merge($this->classmap, $classes);
     }
+
 }

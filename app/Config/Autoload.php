@@ -84,4 +84,9 @@ class Autoload extends AutoloadConfig
      * @var array<int, string>
      */
     public $files = [];
+   /// public $files = ['App/Libraries/MDatabase.php','App/Libraries/MModel.php'];
+   
+    
+
+    
 }
